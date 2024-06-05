@@ -12,8 +12,10 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
-// REPLACE WITH YOUR RECEIVER MAC Address
-uint8_t broadcastAddress[] = {0x10, 0x06, 0x1C, 0x82, 0xA3, 0xD4};
+
+uint8_t roverAddress[] = {0x10, 0x06, 0x1C, 0x82, 0xA3, 0xD4};
+uint8_t armAddress[] = {0xC8, 0x2E, 0x18, 0xF7, 0xAA, 0x80};
+
 
 int momentarySLPinUp = 14;   //white
 int momentarySLPinDown = 12; //yellow
@@ -123,17 +125,23 @@ void setup() {
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Trasnmitted packet
   esp_now_register_send_cb(OnDataSent);
-  
-  // Register peer
-  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+   
   peerInfo.channel = 0;  
   peerInfo.encrypt = false;
-  
-  // Add peer        
+
+  // register rover
+  memcpy(peerInfo.peer_addr, roverAddress, 6);
   if (esp_now_add_peer(&peerInfo) != ESP_OK){
     Serial.println("Failed to add peer");
     return;
   }
+  // register arm
+  memcpy(peerInfo.peer_addr, armAddress, 6);
+  if (esp_now_add_peer(&peerInfo) != ESP_OK){
+    Serial.println("Failed to add peer");
+    return;
+  }
+
 
   pinMode(momentarySLPinUp, INPUT_PULLUP);
   pinMode(momentarySLPinDown, INPUT_PULLUP);
@@ -148,8 +156,7 @@ void loop() {
   myData.deviceID = 1;
   // Set values to send
   Serial.println();
-  //Serial.print(digitalRead(momentarySLPinUp));
-  //Serial.print(digitalRead(momentarySLPinDown));
+
   if(digitalRead(momentarySLPinUp) == LOW){
     myData.momentarySL = 1;
   }else if(digitalRead(momentarySLPinDown) == LOW){
@@ -184,7 +191,8 @@ void loop() {
 
   Serial.print(sizeof(myData));
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+
+  esp_err_t result = esp_now_send(0, (uint8_t *) &myData, sizeof(myData));
    
   if (result == ESP_OK) {
     Serial.println("Sent with success");
