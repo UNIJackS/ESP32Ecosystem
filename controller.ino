@@ -12,15 +12,13 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
-
 uint8_t roverAddress[] = {0x10, 0x06, 0x1C, 0x82, 0xA3, 0xD4};
 uint8_t armAddress[] = {0xC8, 0x2E, 0x18, 0xF7, 0xAA, 0x80};
 
-
-int momentarySLPinUp = 14;   //white
-int momentarySLPinDown = 12; //yellow
-int momentarySRPinUp = 27;   //dark green
-int momentarySRPinDown = 26; //orange
+int momentarySLPinUp = 12;   //yellow
+int momentarySLPinDown = 14; //white
+int momentarySRPinUp = 26;   //orange
+int momentarySRPinDown = 27; //dark green
 
 int toggleSLPin = 13; //blue
 int toggleSRPin = 16; //purple
@@ -32,38 +30,35 @@ int potLPin = 25; //white
 int potMPin = 33; //grey
 int potRPin = 32; //purple
 
-int joyXLPin = 35; //white
-int joyYLPin = 34; //purple
+int joyXRPin = 34; //blue
+int joyYRPin = 35; //green
 
-int joyXRPin = 36; //green
-int joyYRPin = 39; //blue
-
-
-
+int joyXLPin = 39; //purple
+int joyYLPin = 36; //white
 
 // Structure example to send data
 // Must match the receiver structure
 typedef struct struct_message {
   int deviceID; // 1,2,3,4 or 5 depending on device
 
-  int momentarySL; //  -1,0,1 down,middle,up
-  int momentarySR; //  -1,0,1 down,middle,up
+  int momentarySL; //  -1,0,1 | down,middle,up
+  int momentarySR; //  -1,0,1 | down,middle,up
 
-  int toggleSL; //      0,1 down,up
-  int toggleSR; //      0,1 down,up
+  int toggleSL; //      0,1 | down,up
+  int toggleSR; //      0,1 | down,up
 
-  int joySL; //         0,1 down,up
-  int joySR; //         0,1 down,up
+  int joySL; //         0,1 | down,up
+  int joySR; //         0,1 | down,up
 
-  int potL; //          0-1023 analog value
-  int potM; //          0-1023 analog value
-  int potR; //          0-1023 analog value
+  int potL; //          0 to 4095 | left to right
+  int potM; //          0 to 4095 | left to right
+  int potR; //          0 to 4095 | left to right
 
-  int joyXL; //         0-1023 analog value
-  int joyYL; //         0-1023 analog value
+  int joyXL; //         0 to 4095 | left to right
+  int joyYL; //         0 to 4095 | bottom to top
 
-  int joyXR; //         0-1023 analog value
-  int joyYR; //         0-1023 analog value
+  int joyXR; //         0 to 4095 | left to right
+  int joyYR; //         0 to 4095 | bottom to top
 } struct_message;
 
 // Create a struct_message called myData
@@ -71,11 +66,8 @@ struct_message myData;
 
 esp_now_peer_info_t peerInfo;
 
-// callback when data is sent
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  //Serial.print("\r\nLast Packet Send Status:\t");
-  //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-    Serial.print(myData.momentarySL);
+void dumpData(){
+  Serial.print(myData.momentarySL);
   Serial.print(",");
   Serial.print(myData.momentarySR);
   Serial.print(",");
@@ -107,6 +99,14 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print(myData.joyYR);
   Serial.print(",");
   Serial.println("");
+}
+
+
+// callback when data is sent
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+  //Serial.print("\r\nLast Packet Send Status:\t");
+  //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  dumpData();
 }
  
 void setup() {
@@ -200,5 +200,5 @@ void loop() {
   else {
     Serial.println("Error sending the data");
   }
-  delay(100);
+  delay(1000);
 }
