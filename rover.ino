@@ -34,30 +34,31 @@ const int motorAReverseChannel = 1;
 const int motorBForwardChannel = 2;
 const int motorBReverseChannel = 3;
 
-// Structure example to receive data
-// Must match the sender structure
+// Structure example to send data
+// Must match the receiver structure
 typedef struct struct_message {
   int deviceID; // 1,2,3,4 or 5 depending on device
 
-  int momentarySL; //  -1,0,1 down,middle,up
-  int momentarySR; //  -1,0,1 down,middle,up
+  int momentarySL; //  -1,0,1 | down,middle,up
+  int momentarySR; //  -1,0,1 | down,middle,up
 
-  int toggleSL; //      0,1 down,up
-  int toggleSR; //      0,1 down,up
+  int toggleSL; //      0,1 | down,up
+  int toggleSR; //      0,1 | down,up
 
-  int joySL; //         0,1 down,up
-  int joySR; //         0,1 down,up
+  int joySL; //         0,1 | down,up
+  int joySR; //         0,1 | down,up
 
-  int potL; //          0-1023 analog value
-  int potM; //          0-1023 analog value
-  int potR; //          0-1023 analog value
+  int potL; //          0 to 4095 | left to right
+  int potM; //          0 to 4095 | left to right
+  int potR; //          0 to 4095 | left to right
 
-  int joyXL; //         0-1023 analog value
-  int joyYL; //         0-1023 analog value
+  int joyXL; //         0 to 4095 | left to right
+  int joyYL; //         0 to 4095 | bottom to top
 
-  int joyXR; //         0-1023 analog value
-  int joyYR; //         0-1023 analog value
+  int joyXR; //         0 to 4095 | left to right
+  int joyYR; //         0 to 4095 | bottom to top
 } struct_message;
+
 
 // Create a struct_message called myData
 struct_message myData;
@@ -107,7 +108,6 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 
   //stops running if arm contorl is slected
   if(myData.toggleSR == 1){
-    
     ledcWrite(motorAForwardChannel, 0);
     ledcWrite(motorAReverseChannel, 0);
 
@@ -117,48 +117,48 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   }
 
   //checks if the left joy stick is forward then writes its positon to the motor driver
-  if(myData.joyXL > 2000){
+  if(myData.joyYL > 2000){
     Serial.println("left forward");
-    int mappedJoyXL = map((myData.joyXL), 2057, 4095, 0, 255);
+    int mappedJoyYL = map((myData.joyXL), 2057, 4095, 0, 255);
 
-    Serial.println(mappedJoyXL);
-    ledcWrite(motorAForwardChannel, mappedJoyXL);
+    Serial.println(mappedJoyYL);
+    ledcWrite(motorAForwardChannel, mappedJoyYL);
   }else{
     ledcWrite(motorAForwardChannel, 0);
   }
 
-  //checks if the left joy stick is back then writes its positon to the left motor driver
-  if(myData.joyXL < 1800){
+  //checks if the left joy stick is back then writes its positon to the motor driver
+  if(myData.joyYL < 1800){
     Serial.println("left backward");
-    int mappedJoyXL = map((myData.joyXL), 0, 2037, 0, 255);
+    int mappedJoyYL = map((myData.joyXL), 0, 2037, 0, 255);
 
-    mappedJoyXL = 255-mappedJoyXL;
+    mappedJoyYL = 255-mappedJoyYL;
 
-    Serial.println(mappedJoyXL);
-    ledcWrite(motorAReverseChannel, mappedJoyXL);
+    Serial.println(mappedJoyYL);
+    ledcWrite(motorAReverseChannel, mappedJoyYL);
   }else{
     ledcWrite(motorAReverseChannel, 0);
   }
-  
-  //Serial.println(map_Y_R);
-  if(myData.joyXR > 2000){
-    Serial.println("right forward");
-    int mappedJoyXR = map((myData.joyXR), 2057, 4095, 0, 255);
 
-    Serial.println(mappedJoyXR);
-    ledcWrite(motorBForwardChannel, mappedJoyXR);
+  //checks if the right joy stick is forward then writes its positon to the motor driver
+  if(myData.joyYR > 2000){
+    Serial.println("right forward");
+    int mappedJoyYR = map((myData.joyXR), 2057, 4095, 0, 255);
+
+    Serial.println(mappedJoyYR);
+    ledcWrite(motorBForwardChannel, mappedJoyYR);
   }else{
     ledcWrite(motorBForwardChannel, 0);
   }
-
-  if(myData.joyXR < 1800){
+  //checks if the right joy stick is back then writes its positon to the motor driver
+  if(myData.joyYR < 1800){
     Serial.println("right backward");
-    int mappedJoyXR = map((myData.joyXR), 0, 2037, 0, 255);
+    int mappedJoyYR = map((myData.joyXR), 0, 2037, 0, 255);
 
-    mappedJoyXR = 255-mappedJoyXR;
+    mappedJoyYR = 255-mappedJoyYR;
 
-    Serial.println(mappedJoyXR);
-    ledcWrite(motorBReverseChannel, mappedJoyXR);
+    Serial.println(mappedJoyYR);
+    ledcWrite(motorBReverseChannel, mappedJoyYR);
   }else{
     ledcWrite(motorBReverseChannel, 0);
   }
