@@ -103,8 +103,19 @@ void dumpData(){
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&myData, incomingData, sizeof(myData));
 
-
   dumpData();
+
+  //stops running if arm contorl is slected
+  if(myData.toggleSR == 1){
+    
+    ledcWrite(motorAForwardChannel, 0);
+    ledcWrite(motorAReverseChannel, 0);
+
+    ledcWrite(motorBForwardChannel, 0);
+    ledcWrite(motorBReverseChannel, 0);
+    return;
+  }
+
   //checks if the left joy stick is forward then writes its positon to the motor driver
   if(myData.joyXL > 2000){
     Serial.println("left forward");
