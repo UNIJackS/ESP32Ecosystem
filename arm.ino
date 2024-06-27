@@ -11,23 +11,17 @@
 
 #include <esp_now.h>
 #include <WiFi.h>
-#include <AccelStepper.h>
 
 //------------------PINS--------------------
-const int primaryYDirPin = 1;
-const int primaryYStepPin = 2;
+const int primaryYDirPin = 27;    //purple
+const int primaryYStepPin = 14;   //blue
 
-const int secondaryYDirPin = 3;
-const int secondaryYStepPin = 4;
+const int secondaryYDirPin = 25;  //purple
+const int secondaryYStepPin = 26; //blue
 
-const int XDirPin = 5;
-const int XStepPin = 6;
+const int XDirPin = 12;           //white
+const int XStepPin = 13;          // grey
 
-//------------------Driver Objects--------------------
-
-AccelStepper primaryY(AccelStepper::FULL2WIRE, primaryYStepPin, primaryYDirPin);
-AccelStepper secondaryY(AccelStepper::FULL2WIRE, secondaryYStepPin, secondaryYDirPin);
-AccelStepper x(AccelStepper::FULL2WIRE, XStepPin, XDirPin);
 
 // Structure example to receive data
 // Must match the sender structure
@@ -92,7 +86,11 @@ void dumpData(){
   Serial.println("");
 }
 
+long lastPolTime = millis();
 
+int primaryYDir = 0;    //-1,0,1 reverse,stop,forward
+int secondaryYDir = 0;  //-1,0,1 reverse,stop,forward
+int XDir = 0;           //-1,0,1 reverse,stop,forward
 
 // callback function that will be executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
@@ -108,53 +106,61 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 
 
   //primary y axis driving
-  if(myData.joyXL > 2000){
+  if(myData.joyYL > 2000){
     Serial.println("left forward");
-    primaryY.moveTo(primaryY.currentPosition() + 10);
-  }
-  if(myData.joyXL < 1800){
+    primaryYDir = 1;
+  }else if(myData.joyYL < 1700){
     Serial.println("left backward");
-    primaryY.moveTo(primaryY.currentPosition() - 10);
+    primaryYDir = -1;
+  }else{
+    primaryYDir = 0;
   }
   
   //secondary y axis driving
-  if(myData.joyXR > 2000){
+  if(myData.joyYR > 2000){
     Serial.println("right forward");
-    secondaryY.moveTo(secondaryY.currentPosition() + 10);
-  }
-  if(myData.joyXR < 1800){
+    secondaryYDir = 1;
+  }else if(myData.joyYR < 1700){
     Serial.println("right backward");
-    secondaryY.moveTo(secondaryY.currentPosition() - 10);
+    secondaryYDir = -1;
+  }else{
+    secondaryYDir = 0;
   }
 
   //secondary y axis driving
-  if(myData.joyYR > 2000){
+  if(myData.joyXR > 2000){
     Serial.println("right pointing right");
-    x.moveTo(x.currentPosition() + 10);
-  }
-  if(myData.joyYR < 1800){
+    XDir = 1;
+  }else if(myData.joyXR < 1700){
     Serial.println("right pointing left");
-    x.moveTo(x.currentPosition() - 10);
+    XDir = -1;
+  }else{
+    XDir = 0;
   }
 
+}
+
+void direction(int pin, int value) {
+  if(value == 1){
+    digitalWrite(pin, LOW);
+  }else if(value == -1){
+    digitalWrite(pin, HIGH);
+  }
 }
  
 void setup() {
   // Initialize Serial Monitor
   Serial.begin(115200);
 
-  primaryY.setMaxSpeed(1000);
-  primaryY.setAcceleration(100);
-  primaryY.setSpeed(200);
+  pinMode(primaryYDirPin, OUTPUT);
+  pinMode(primaryYStepPin, OUTPUT);
 
-  secondaryY.setMaxSpeed(1000);
-  secondaryY.setAcceleration(100);
-  secondaryY.setSpeed(200);
-  
-  x.setMaxSpeed(1000);
-  x.setAcceleration(100);
-  x.setSpeed(200);
-  
+  pinMode(secondaryYDirPin, OUTPUT);
+  pinMode(secondaryYStepPin, OUTPUT);
+
+  pinMode(XDirPin, OUTPUT);
+  pinMode(XStepPin, OUTPUT);
+
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -170,8 +176,23 @@ void setup() {
 }
  
 void loop() {
- primaryY.run();
- secondaryY.run();
- x.run();
+  direction(primaryYDirPin, primaryYDir);
+  direction(secondaryYDirPin, secondaryYDir);
+  direction(XDirPin, XDir);
 
+  if(primaryYDir != 0){
+    digitalWrite(primaryYStepPin, HIGH);
+  }
+  if(secondaryYDir != 0){
+    digitalWrite(secondaryYStepPin, HIGH);
+  }
+  if(XDir != 0){
+    digitalWrite(XStepPin, HIGH);
+  }
+
+  delay(1);
+  digitalWrite(primaryYStepPin, LOW);
+  digitalWrite(secondaryYStepPin, LOW);
+  digitalWrite(XStepPin, LOW);
+  delay(1);
 }
