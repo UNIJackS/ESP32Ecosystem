@@ -7,3 +7,6 @@ Construction
 - Y Primary is yellow wire
 - Y secondary is red wire
 - X is blue wire
+
+- 0 is gripper open
+- 73 is gripper closed
