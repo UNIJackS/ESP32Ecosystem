@@ -11,6 +11,7 @@
 
 #include <esp_now.h>
 #include <WiFi.h>
+#include <ESP32Servo.h>
 
 //------------------PINS--------------------
 const int primaryYDirPin = 27;    //purple
@@ -22,6 +23,8 @@ const int secondaryYStepPin = 26; //blue
 const int XDirPin = 12;           //white
 const int XStepPin = 13;          // grey
 
+const int gripperPin = 33; 
+const int wristPin = 32; 
 
 // Structure example to receive data
 // Must match the sender structure
@@ -37,19 +40,23 @@ typedef struct struct_message {
   int joySL; //         0,1 down,up
   int joySR; //         0,1 down,up
 
-  int potL; //          0-1023 analog value
-  int potM; //          0-1023 analog value
-  int potR; //          0-1023 analog value
+  int potL; //          0 to 4095 | left to right
+  int potM; //          0 to 4095 | left to right
+  int potR; //          0 to 4095 | left to right
 
-  int joyXL; //         0-1023 analog value
-  int joyYL; //         0-1023 analog value
+  int joyXL; //         0 to 4095 | left to right
+  int joyYL; //         0 to 4095 | bottom to top
 
-  int joyXR; //         0-1023 analog value
-  int joyYR; //         0-1023 analog value
+  int joyXR; //         0 to 4095 | left to right
+  int joyYR; //         0 to 4095 | bottom to top
 } struct_message;
 
 // Create a struct_message called myData
 struct_message myData;
+
+// Creates servo objects to contorl the wrist and gripper
+Servo gripperServo;
+Servo wristServo;
 
 void dumpData(){
   Serial.print(myData.momentarySL);
@@ -86,17 +93,18 @@ void dumpData(){
   Serial.println("");
 }
 
-long lastPolTime = millis();
-
 int primaryYDir = 0;    //-1,0,1 reverse,stop,forward
 int secondaryYDir = 0;  //-1,0,1 reverse,stop,forward
 int XDir = 0;           //-1,0,1 reverse,stop,forward
+
+int gripperPos = 0; // 0,73   open to closed
+int wristPos = 0;   // 0,180  rotation of wrist
 
 // callback function that will be executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&myData, incomingData, sizeof(myData));
 
-  dumpData();
+  //dumpData();
 
   //stops running if rover contorl is slected
   if(myData.toggleSL == 1){
@@ -104,7 +112,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
     return;
   }
 
-
+  //-------------Stepper Driving-------------
   //primary y axis driving
   if(myData.joyYL > 2000){
     Serial.println("left forward");
@@ -128,14 +136,25 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   }
 
   //secondary y axis driving
-  if(myData.joyXR > 2000){
+  if(myData.joyXL > 2000){
     Serial.println("right pointing right");
     XDir = 1;
-  }else if(myData.joyXR < 1700){
+  }else if(myData.joyXL < 1700){
     Serial.println("right pointing left");
     XDir = -1;
   }else{
     XDir = 0;
+  }
+  //-------------Servo Driving-------------
+
+  wristPos = map(myData.potR,0,4095,0,180);
+
+  if(myData.joyXR > 2000 && (gripperPos + 1) <= 73){
+    Serial.println("Gripper opening");
+    gripperPos += 1;
+  }else if(myData.joyXR < 1700 && (gripperPos - 1) >= 0){
+    Serial.println("Gripper closing");
+    gripperPos -= 1;
   }
 
 }
@@ -152,6 +171,7 @@ void setup() {
   // Initialize Serial Monitor
   Serial.begin(115200);
 
+  //-------------Stepper Driving-------------
   pinMode(primaryYDirPin, OUTPUT);
   pinMode(primaryYStepPin, OUTPUT);
 
@@ -161,6 +181,19 @@ void setup() {
   pinMode(XDirPin, OUTPUT);
   pinMode(XStepPin, OUTPUT);
 
+  //-------------Servo Driving-------------
+  ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
+
+	gripperServo.setPeriodHertz(50);   
+	gripperServo.attach(gripperPin, 500, 2400); 
+  
+  wristServo.setPeriodHertz(50);    
+	wristServo.attach(wristPin, 500, 2400);
+
+  //-------------ESP NOW------------- 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -169,17 +202,22 @@ void setup() {
     Serial.println("Error initializing ESP-NOW");
     return;
   }
-  
   // Once ESPNow is successfully Init, we will register for recv CB to
   // get recv packer info
   esp_now_register_recv_cb(OnDataRecv);
 }
  
 void loop() {
+  //-------------Servo Driving-------------
+ 
+  
+  gripperServo.write(gripperPos);
+  wristServo.write(wristPos);
+
+  //-------------Stepper Driving-------------
   direction(primaryYDirPin, primaryYDir);
   direction(secondaryYDirPin, secondaryYDir);
   direction(XDirPin, XDir);
-
   if(primaryYDir != 0){
     digitalWrite(primaryYStepPin, HIGH);
   }
@@ -189,7 +227,6 @@ void loop() {
   if(XDir != 0){
     digitalWrite(XStepPin, HIGH);
   }
-
   delay(1);
   digitalWrite(primaryYStepPin, LOW);
   digitalWrite(secondaryYStepPin, LOW);
