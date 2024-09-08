@@ -1,6 +1,6 @@
 ESPnow ecosystem. 
 =======
-* This Repository contains the code and documentation for controlling my robotics projects. I currently have a controller, rover and arm however I plan to add to in the future. The idea of this project was to create an ecosystem in which all my projects use the same control scheme. This would allow me to use the same controller and program to control all my current and future projects. It would also speed up my development process as I wouldn't have to start from nothing every time. 
+* This Repository contains the code and documentation for controlling my robotics projects. I have built a controller, rover and arm. The idea of this project was to create an ecosystem in which all my projects use the same control scheme. This would allow me to use the same controller and or program to control all my current and future projects. It would also speed up my development process as I wouldn't have to start from nothing every time. 
 
 Images
 -----------
@@ -20,7 +20,7 @@ Controller
 
 Rover
 -----------
-* This is the third iteration of the rover. The first version was not finished and was built from sheet metal with 3d printed PLA wheels. I found that it was difficult to align the wheels on the sheet metal. This resulted in the second iteration which was entirely 3d printed. The body was broken up into 4 parts as the whole body would not fit on my Ender 3v2's print bed. The 3d printed parts made it extremely easy to align everything as I could model holes and slots for everything to fit into. However, it also took a long time to print and PLA is expensive. The mechanical system for this iteration was also far too complicated which resulted in it only working once. I then redesigned it again which resulted in this iteration. The body is made from a sheet of 20mm MDF and the side panels are made from 3mm aluminium. I chose to use MDF as it was cheap and I could easily cut it accurately with a circular saw. I chose to use Aliuminum for the sides as it is easy to accurately drill, file and cut. I simplified the mechanical system for the current iteration. The motors drive a roller which is pushed against the wheel causing it to also rotate. 
+* This is the third iteration of the rover. The first version was not finished and was built from sheet metal with 3d printed PLA wheels. I found that it was difficult to align the wheels on the sheet metal. This resulted in the second iteration which was entirely 3d printed. The body was broken up into 4 parts as the whole body would not fit on my Ender 3v2's print bed. The 3d printed parts made it extremely easy to align everything as I could model holes and slots for everything to fit into. However, it also took a long time to print and PLA is expensive. The mechanical system for this iteration was also far too complicated which resulted in it only working once. I then redesigned it again which resulted in this iteration. The body is made from a sheet of 20mm MDF and the side panels are made from 3mm aluminium. I chose to use MDF as it was cheap and I could easily cut it accurately with a circular saw. I chose to use Aliuminum for the sides as it is easy to accurately drill, file and cut. I simplified the mechanical system for the current iteration. The motors drive a roller which is pushed against the wheel causing it to rotate. 
 
 
 MAC addresses:
