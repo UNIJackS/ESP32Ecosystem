@@ -1,19 +1,27 @@
 ESPnow ecosystem. 
 =======
 * This Repository contains the code and documentation for controlling my robotics projects. I currently have a controller, rover and arm however I plan to add to in the future. The idea of this project was to create an ecosystem in which all my projects use the same control scheme. This would allow me to use the same controller and program to control all my current and future projects. It would also speed up my development process as I wouldn't have to start from nothing every time. 
-  
+
+Images
+-----------
+<p align="center">
+  <img src="assets/controller.png" alt="Image of Controller" height="250"/>
+   <img src="assets/arm.png" alt="Image of Arm" height="250"  />
+   <img src="assets/rover.png" alt="Image of Rover" height="250"  />
+</p>
  
 Controller
 -----------
-* This is the core of the ecosystem as it connects and controls the other projects. It currently has 2 joysticks, 3 potentiometers, 2 toggle switches and 2 momentary switches.
+* I built the controller first. The first version of this was centred around an Arduino nano and 433 MHz radio. The radio was reliable and long-range i could control the rover from the other side of my house. However, the refresh rate left a lot to be desired. There was a noticeable delay between moving a joystick and the rover moving. This is why I upgraded to an ESP32. The built-in ESP-NOW protocol provided me with long-range, reliable and fast communication. The controller currently has 2 joysticks, 3 potentiometers, 2 toggle switches and 2 momentary switches. However, due to an oversight, the third potentiometer is not connected as there are too few analog pins. This is because the ESP32 has two analog digital converters ADC1 (8 pins) and ADC2 (10 pins). When wifi is enabled which is required for the ESP-NOW protocol ADC2 is disabled. Then of the 8 only 6 are available on my devboard. 
+
+ Arm
+-----------
+* This is the second iteration of the robotic arm. The previous version was built from 3d printed PLA and carbon fibre rods. It suffered from a lack of power due to the limited gear ratios I could achieve with 6mm timing belts and matching gears. I needed a different way to gear down my motors. After some research, I found relatively cheap planetary gearboxes on Aliexpress. I then redesigned the arm to use these. I built the current arm from 3mm aluminium that I cut by hand and 3d printed PLA. The current arm uses 3 stepper motors (model no. 17HE15-1504S) for the 3 primary axis. The x-axis and secondary y-axis motors are geared down with a ratio of 1:13. The primary y-axis motor is geared down with a ratio of 1:13. 2 servo motors (TD-8125MG) control the rotation and opening/closing of the gripper. 
 
 Rover
 -----------
-* This is the most mobile part of the ecosystem providing a way to move a sizeable payload from one spot to another. However, it could not load itself which led to the development of the arm. The rover is very simple it follows a differential steering model with 3 wheels and 2 motors. I chose this simple design as it minimised the chances of something breaking. The fewer parts there are the less thing that can go wrong. This was a very big lesson for me after building the controller which had so many things that could go wrong.
+* This is the third iteration of the rover. The first version was not finished and was built from sheet metal with 3d printed PLA wheels. I found that it was difficult to align the wheels on the sheet metal. This resulted in the second iteration which was entirely 3d printed. The body was broken up into 4 parts as the whole body would not fit on my Ender 3v2's print bed. The 3d printed parts made it extremely easy to align everything as I could model holes and slots for everything to fit into. However, it also took a long time to print and PLA is expensive. The mechanical system for this iteration was also far too complicated which resulted in it only working once. I then redesigned it again which resulted in this iteration. The body is made from a sheet of 20mm MDF and the side panels are made from 3mm aluminium. I chose to use MDF as it was cheap and I could easily cut it accurately with a circular saw. I chose to use Aliuminum for the sides as it is easy to accurately drill, file and cut. I simplified the mechanical system for the current iteration. The motors drive a roller which is pushed against the wheel causing it to also rotate. 
 
-Arm
------------
-* This is the most versatile part of the ecosystem. When mounted to the rover it allows it to load payloads by itself. When mounted statically it can perform other actions like moving blocks or other simple manipulations. The arm is controlled by 5 motors. 3 of which are stepper motors that control the primary axis of the arm. The other 2 are servo motors which rotate and operate the gripper on the end of the arm.
 
 MAC addresses:
 -----------
