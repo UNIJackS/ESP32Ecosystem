@@ -5,9 +5,9 @@ ESPnow ecosystem.
 Images
 -----------
 <p align="center">
-  <img src="assets/controller.png" alt="Image of Controller" height="250"/>
-   <img src="assets/arm.png" alt="Image of Arm" height="250"  />
-   <img src="assets/rover.png" alt="Image of Rover" height="250"  />
+  <img src="assets/controller.png" alt="Image of Controller" height="200"/>
+   <img src="assets/arm.png" alt="Image of Arm" height="200"  />
+   <img src="assets/rover.png" alt="Image of Rover" height="200"  />
 </p>
  
 Controller
