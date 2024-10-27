@@ -1,4 +1,4 @@
-ESPnow ecosystem. 
+ESPnow Ecosystem
 =======
 * This Repository contains the code and documentation for controlling my robotics projects. I have built a controller, rover and arm. The idea of this project was to create an ecosystem in which all my projects use the same control scheme. This would allow me to use the same controller and or program to control all my current and future projects. It would also speed up my development process as I wouldn't have to start from nothing every time. 
 
